@@ -1,0 +1,523 @@
+1.002   2023-01-04  Released-By: PERLANCAR; Urgency: medium
+
+        - [cli csv-intrange] Add option --sort.
+
+        - Fix Abstract of csv-uniq.
+
+
+1.001   2023-01-04  Released-By: PERLANCAR; Urgency: medium
+
+        - Add utilities: csv-intrange, csv-uniq.
+
+
+1.000   2022-12-29  Released-By: PERLANCAR; Urgency: medium
+
+        - No functional changes since 0.999_2.
+
+        - Documentation tweaks.
+
+
+0.999_2 2022-12-23  Released-By: PERLANCAR; Backward-Incompatible: yes
+
+        [Incompatible changes]
+
+        - [internal] Remove wants_repeat_* flow control because it is inherently
+          broken. Utilities that want to read files out of order or repeat
+          reading, like csv-concat, can construct the loop manually. Now,
+          csv-concat can work with non-seekable input files like process
+          substitution (e.g.: `csv-concat <(...) <(...)`).
+
+        [Documentation]
+
+        - Add entries to cookbook.
+
+
+0.999_1 2022-12-21  Released-By: PERLANCAR; Backward-Incompatible: yes
+
+        [Incompatible changes]
+
+        - Rename variable given to eval codes '$main::field_idxs' to
+          '$main::fields_idx'.
+
+        - [cli csv-sort-fields] --by-code code now receives [$field_name,
+          $field_idx] instead of just $field_name.
+
+        - [cli csv-select-rows] row number spec now means *data row* number
+          spec, e.g. 1 means the first *data* row.
+
+        - [cli csv-select-rows] Will not output header row if there is no rows
+          matching spec.
+
+        - [cli csv-setop] Will not output header row if there is no result data
+          rows.
+
+        - [cli csv-convert-to-hash] Row number now means *data* row number, e.g.
+          1 means the first row number.
+
+        [New features]
+
+        - Add utility: csv-gen.
+
+        [Internals]
+
+        - Make API modular. It is now possible and easier to create a new
+          utility without modifying the "core" routine. No more "core" routine.
+
+        [Enhancements]
+
+        - [cli csv-select-fields] Add option --show-selected-fields, like in
+          csv-delete-fields.
+
+        [Removed]
+
+        - Remove alias CLI's: csv2csv (only csv-csv now provided), dump-csv
+          (only csv-dump now provided).
+
+        - Reading from & writing to URL feature is removed to remove dependency
+          to LWP::UserAgent. One can use piping to/from clipget/clipadd to read
+          from/write to clipboard. There are other tools for reading/writing to
+          URL addresses.
+
+        [Documentation & UX]
+
+        - Add example(s) to all utilities.
+
+        - Add -a as shortcut for --include-all-fields, -A for
+          --exclude-all-fields.
+
+
+0.054   2022-12-14  Released-By: PERLANCAR; Urgency: medium
+
+        - [cli csv-concat] Prevent warning & segfault because of extra
+          fields in data rows (RT#145466).
+
+        - [bugfix] [cli csv-info] Fix row counts.
+
+        - [ux] Enable logging in CLIs.
+
+
+0.053   2022-12-09  Released-By: PERLANCAR; Urgency: medium
+
+        - [bugfix] [cli csv-select-rows] Fix function metadata (multiple
+          args with pos=1).
+
+        - [bugfix] [cli csv-fill-template] Fix function metadata (multiple
+          args with pos=1).
+
+        - [bugfix] [cli csv-concat] Fix function metadata (clashing argument
+          positions --filename & --output-filename) (RT#145467).
+
+
+0.052   2022-12-05  Released-By: PERLANCAR; Urgency: medium
+
+        - [bugfix][clis csv-sort-rows, csv-sort-fields, csv-concat] Didn't
+          observe -O and/or -o (RT#145283).
+
+
+0.051   2022-12-02  Released-By: PERLANCAR; Urgency: medium; Backward-Incompatible: yes
+
+        [Incompatible changes]
+
+        - Rename csv-select-row to csv-select-rows for consistency.
+
+        - [cli csv-sort-fields] Rename by_example to by_examples argument
+          and make it an array, on CLI specify one example at a time with
+          --by-example, to allow header name that contains comma.
+
+        [Enhancements]
+
+        - Add utilities csv-pick-rows, csv-pick-fields, csv-shuf-rows,
+          csv-shuf-fields.
+
+        - [cli csv-sort-fields] Add options --by-code, --by-sortsub.
+
+
+0.050   2022-12-02  Released-By: PERLANCAR; Urgency: low
+
+        - No functional changes.
+
+        - [build] Rebuild to work around bug in my toolchain that still uses the
+          old module to generate POD.
+
+
+0.049   2022-12-02  Released-By: PERLANCAR; Urgency: low
+
+        - No functional changes.
+
+        - [cli csv-sort-rows] Update documentation (no more --by-fields).
+
+
+0.048   2022-12-02  Released-By: PERLANCAR; Urgency: medium; Backward-Incompatible: yes
+
+        [Incompatible changes]
+
+        - [cli csv-sort-rows] Make by_fields argument an array and specify on
+          CLI one field at a time with --by-field to allow header name which
+          contains comma (RT#145282).
+
+        [Enhancements]
+
+        - Improve --by-field tab completion (provide +FIELD, -FIELD, ~FIELD).
+
+
+0.047   2022-12-01  Released-By: PERLANCAR; Urgency: medium
+
+        - [cli csv-add-field] Rename to csv-add-fields, now can add multiple
+          fields, -e is now optional, also add -H (RT#145276, RT#145268).
+
+        - [bugfix] [cli csv-sort, csv-sort-rows] output_filename was not
+          passed to csvutil() (RT#145267).
+
+        - [bugfix] [cli csv-setop] Fix argument parsing (output_filename
+          clashes with filename) (RT#145275).
+
+        - [doc] Tweak Abtract for csv-setop to make it a bit more discoverable.
+
+
+0.046   2022-10-25  Released-By: PERLANCAR; Urgency: medium
+
+        - Add utility: csv2vcf.
+
+
+0.045   2022-10-09  Released-By: PERLANCAR; Urgency: medium
+
+        - Add option --output-filename (-o) and --overwrite (-O); allow
+          reading/writing to URL in addition to file.
+
+
+0.044   2022-08-09  Released-By: PERLANCAR; Urgency: high
+
+        - Merge releases 0.041 & 0.041.2.
+
+
+0.041.2 2022-08-08  Released-By: PERLANCAR; Urgency: medium
+
+        - Add utilities: csv-fill-template, csv-get-cells.
+
+        - [cli cli-munge-row] Avoid warning when perl code adds a new field.
+
+        - UPDATE 2022-08-09: rename release from 0.041 to 0.041.2 due to
+          conflict.
+
+
+0.043   2022-08-01  Released-By: PERLANCAR; Urgency: low
+
+        - No functional changes.
+
+        - Tweak POD formatting.
+
+
+0.042   2022-08-01  Released-By: PERLANCAR; Urgency: low
+
+        - No functional changes.
+
+        - [doc] Add some examples to App::CSVUtils::Manual::Cookbook.
+
+
+0.041   2022-08-01  Released-By: PERLANCAR; Urgency: medium
+
+        - Add utility: csv-get-cells.
+
+        - [cli cli-munge-row] Avoid warning when perl code adds a new
+          field.
+
+
+0.040   2022-08-01  Released-By: PERLANCAR; Urgency: medium; Backward-Incompatible: yes
+
+        [Incompatible changes]
+
+        - Rename csv-delete-field to csv-delete-fields to reflect the fact that
+          it can now select multiple fields.
+
+        - Short option -f now becomes shortcut for --include-field (a.k.a.
+          --field) instead of for --filename.
+
+        [clis csv-delete-fields, csv-select-fields]
+
+        - Improve field selection ability by adding --exclude-field (-F),
+          --exclude-field-pat to exclude fields. We know have four options
+          to select fields: --include-field (--field, -f),
+          --include-field-pat, --exclude-field (-F), and --exclude-field-pat.
+          In addition to that, we also have --include-all-fields and
+          --exclude-all-fields as alias for --include-field-pat .* and
+          --exclude-field-pat .*, respectively.
+
+        - Add option --ignore-unknown-fields to ignore unknown field specified
+          via --include-field (--field, -f) or --exclude-field (-F).
+
+        - Add option --show-selected-fields to show selected fields and
+          immediately exit.
+
+
+0.039   2022-07-27  Released-By: PERLANCAR; Urgency: low
+
+        - No functional changes.
+
+        - [doc] Mention more CSV-related modules.
+
+
+0.038   2022-07-25  Released-By: PERLANCAR; Urgency: medium
+
+        - Add utility: csv-munge-row.
+
+
+0.037   2022-03-27  Released-By: PERLANCAR; Urgency: medium
+
+        - Set input and output encoding to UTF8 and note this in the
+          scripts' documentation (RT#141357).
+
+
+0.036   2022-02-10  Released-By: PERLANCAR; Urgency: medium
+
+        - [cli csv-freqtable] [bugfix] Extraneous first row was produced.
+
+
+0.035   2022-02-10  Released-By: PERLANCAR; Urgency: medium
+
+        - Add utility: csv-freqtable.
+
+
+0.034   2021-07-10  Released-By: PERLANCAR; Urgency: medium
+
+	- [bugfix][doc] Cookbook package was not renamed.
+
+
+0.033   2021-07-10  Released-By: PERLANCAR; Urgency: medium
+
+	- Add logging.
+
+        - [build] Rebuild with newer Perinci::CmdLine::POD 0.023 to generate
+          POD-formatted usage line.
+
+
+0.032   2020-08-16  Released-By: PERLANCAR; Urgency: medium
+
+	- Add utility: csv-transpose.
+
+	- Add cookbook (mostly only placeholders for now).
+
+
+0.031   2020-08-03  Released-By: PERLANCAR; Urgency: medium
+
+	- Add CLI: csv-csv (csv2csv).
+
+	- Add CSV output options --output-{sep,quote,escape}-char for CLIs
+	  that output CSV, e.g. csv-sort, csv-grep, csv-sum, csv-split,
+	  csv-csv, etc.
+
+        [cli csv-info]
+
+        - [ux] Now defaults to producing naked result (RT#133078).
+
+
+0.030   2020-07-30  Released-By: PERLANCAR; Urgency: medium
+
+	- Add common options: --sep-char, --quote-char, --escape-char
+	  (RT#133079).
+
+	[cli csv-info]
+
+        - [bugfix] Avoid dying on invalid CSV by initializing $fields to []
+	  (RT#133077).
+
+	[cli csv-setop]
+
+        - [bugfix][doc] Fix the documentation of --compare-fields (RT#133076).
+
+
+0.029   2020-05-29  Released-By: PERLANCAR; Urgency: medium
+
+	- Add utility: csv2td.
+
+
+0.028   2019-12-27  Released-By: PERLANCAR; Urgency: medium
+
+	[cli csv-sort-rows]
+
+        - Add options --key (-k), --by-sortsub.
+
+
+0.027   2019-12-23  Released-By: PERLANCAR; Urgency: medium
+
+	- Tweak tab completion.
+
+
+0.026   2019-12-19  Released-By: PERLANCAR; Urgency: medium
+
+	- Add ability to read CSV from stdin.
+
+	- [bugfix] csv-sort-rows, csv-sort-fields: didn't observe common
+	  options --tsv and --no-header.
+
+
+0.025   2019-11-29  Released-By: PERLANCAR; Urgency: medium
+
+	- Update coerce rule names in Sah schemas (Data::Sah::Coerce
+	  0.034+).
+
+
+0.024   2019-11-14  Released-By: PERLANCAR; Urgency: medium
+
+	- Add utility: csv-split.
+
+
+0.023   2019-06-06  Released-By: PERLANCAR
+
+	- Add utiity: csv-info.
+
+	- [doc] Explain --no-header more.
+
+
+0.022   2019-05-21  Released-By: PERLANCAR
+
+	- Add csv2ltsv script (ltsv2csv not yet).
+
+	- [doc] Mention App::TSVUtils and App::LTSVUtils; update that
+	  csv2tsv, tsv2csv are now included by us.
+
+
+0.021   2019-05-12  Released-By: PERLANCAR
+
+	- Add scripts: csv2tsv, tsv2csv.
+
+
+0.020   2019-04-29  Released-By: PERLANCAR
+
+        - Add utilities: csv-setop, csv-sort-rows (with alias csv-sort),
+          csv-lookup-fields.
+
+        - Make $main::csv available to Perl code.
+
+        - [bugfix] A couple of fixes.
+
+
+0.019   2019-04-23  Released-By: PERLANCAR
+
+	- Declare argument specification variables with 'our' instead of
+	  'my' so they are accessible from outside.
+
+
+0.018   2019-04-23  Released-By: PERLANCAR
+
+	- Add option --tsv to parse input file as TSV instead of CSV.
+
+
+0.017   2019-04-23  Released-By: PERLANCAR
+
+	- csvutil(): forgot to update valid actions in schema.
+
+
+0.016   2019-04-23  Released-By: PERLANCAR
+
+	- Add utility: csv-dump (and its alias dump-csv).
+
+
+0.015   2019-04-15  Released-By: PERLANCAR
+
+	- Add utility: csv-each-row.
+
+	- Make $main::field_idxs also available for Perl code.
+
+	- [ux] CLIs do not need to read env or config.
+
+	- Allow 'eval' argument to be coderef, for when csvutil() is called
+	  from Perl.
+
+
+0.014   2018-05-25  Released-By: PERLANCAR
+
+	- Add utility: csv-map.
+
+	- [ux] (for csv-grep, csv-map): Compile --eval code in 'main' package,
+	  turn off strict & warnings.
+
+	- csv-grep & csv-map: also set $main::row and $main::rownum like in
+	  other utilities.
+
+	- [test] Add test for csv-grep (& csv-map).
+
+
+0.013   2017-07-02  Released-By: PERLANCAR
+
+        - Add utility: csv-grep.
+
+        - Add common option: --(no-)header to be able to handle CSV that does
+          not have header row.
+
+
+0.012   2017-04-25  Released-By: PERLANCAR
+
+	- csv-select-fields: Add --field-pat to select by regular
+	  expression.
+
+
+0.011   2016-11-17  Released-By: PERLANCAR
+
+	- [Bugfix] csv-select-fields CLI was not generated in previous
+	  release.
+
+
+0.010   2016-11-16  Released-By: PERLANCAR
+
+	- Add utility: csv-select-fields.
+
+	- csv-delete-field: allow deleting multiple fields in one go.
+
+
+0.009   2016-11-16  Released-By: PERLANCAR
+
+	- Add utility: csv-concat.
+
+	- csv-add-field: add option --after, --before, --at to specify
+	  position of the new field.
+
+
+0.008   2016-11-16  Released-By: PERLANCAR
+
+        - Add utilities: csv-select-row, csv-convert-to-hash.
+
+
+0.007   2016-11-15  Released-By: PERLANCAR
+
+	- Add utilities: csv-sum, csv-avg.
+
+	- csv-add-field: Tweak completion: field should not be completed
+	  with existing field names.
+
+
+0.006   2016-11-03  Released-By: PERLANCAR
+
+        - [ux] Add completion for field name (-F) and --example.
+
+
+0.005   2016-11-03  Released-By: PERLANCAR
+
+        - csv-add-field, csv-munge-field: Don't run code for header row.
+
+        - Tweak descriptions.
+
+
+0.004   2016-11-03  Released-By: PERLANCAR
+
+        - [Removed] Remove utility csvutil.
+
+        - Add utility csv-sort-fields.
+
+
+0.003   2016-11-02  Released-By: PERLANCAR
+
+        - [Incompatible change] Rename script replace-newline-in-csv to
+          csv-replace-newline for consistency with the other utilities.
+
+        - Add tests.
+
+
+0.002   2016-11-02  Released-By: PERLANCAR
+
+	- Add utilities: csvutil, csv-list-field-names, csv-add-field,
+	  csv-delete-field, csv-munge-field.
+
+
+0.001   2016-11-01  Released-By: PERLANCAR
+
+         - First release.

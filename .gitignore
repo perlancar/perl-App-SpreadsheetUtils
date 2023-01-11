@@ -1,0 +1,5 @@
+App-SpreadsheetUtils-*
+.build
+*~
+nytprof*
+.DS_Store
