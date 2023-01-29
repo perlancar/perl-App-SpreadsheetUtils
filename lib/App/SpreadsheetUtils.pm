@@ -130,6 +130,50 @@ sub _get_csv_row {
     $csv->string . "\n";
 }
 
+sub _complete_sheet {
+    # return list of known sheets of a workbook
+
+    my %args = @_;
+    my $word = $args{word} // '';
+    my $cmdline = $args{cmdline};
+    my $r = $args{r};
+
+    # we are not called from cmdline, bail
+    return undef unless $cmdline; ## no critic: Subroutines::ProhibitExplicitReturnUndef
+
+    # let's parse argv first
+    my $args;
+    {
+        # this is not activated yet
+        $r->{read_config} = 1;
+
+        my $res = $cmdline->parse_argv($r);
+        #return undef unless $res->[0] == 200;
+
+        $cmdline->_read_config($r) unless $r->{config};
+        $args = $res->[2];
+    }
+
+    # user hasn't specified -f, bail
+    return {message=>"Please specify input filename first"} unless defined $args && $args->{input_filename};
+
+    # user wants to read spreadsheet from stdin, bail
+    return {message=>"Can't get sheet list when input is stdin"} if $args->{input_filename} eq '-';
+
+    # can the file be opened?
+    require Spreadsheet::Read;
+    my $book = Spreadsheet::Read->new($args->{input_filename}) or do {
+        #warn "Cannot open file '$args->{input_filename}': $!\n";
+        return [];
+    };
+
+    require Complete::Util;
+    return Complete::Util::complete_array_elem(
+        word => $word,
+        array => [$book->sheets],
+    );
+}
+
 sub _complete_field_or_field_list {
     # return list of known fields of a CSV
 
@@ -449,6 +493,7 @@ itself. To quickly list the sheets of a workbook file, you can use
 
 _
         cmdline_aliases => {s=>{}},
+        completion => \&_complete_sheet,
         tags => ['category:filtering'],
     },
 );
@@ -1592,7 +1637,7 @@ sub gen_ss_util {
 1;
 # ABSTRACT: CLI utilities related to spreadsheet (XLS, XLSX, ODS, ...)
 
-=for Pod::Coverage ^(csvutil)$
+=for Pod::Coverage ^(gen_ss_util)$
 
 =head1 DESCRIPTION
 

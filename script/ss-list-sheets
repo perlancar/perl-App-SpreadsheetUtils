@@ -53,6 +53,7 @@ Perinci::CmdLine::Any->new(
 )->run;
 
 # ABSTRACT:
+# PODNAME:
 
 =head1 DESCRIPTION
 

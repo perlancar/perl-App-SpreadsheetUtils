@@ -7,6 +7,7 @@ use warnings;
 die "Not yet implemented!";
 
 # ABSTRACT: (NOT YET IMPLEMENTED) Show information about a spreadsheet file
+# PODNAME:
 
 =head1 SYNOPSIS
 
