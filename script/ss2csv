@@ -73,4 +73,4 @@ L<Spreadsheet::Read> is the backend that does all the magic.
 L<xlsx2csv> (from L<Spreadsheet::Read> distribution) also converts from
 spreadsheet to CSV, but it does not allow outputting to stdout or letting you
 specify the sheet you want. I<ss2csv> also offers conveniences like tab
-completion (e.g. for C<--sheet> (C<-s>).
+completion (e.g. for C<--sheet> (C<-s>)).
