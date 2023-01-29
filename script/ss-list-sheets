@@ -55,9 +55,6 @@ Perinci::CmdLine::Any->new(
 # ABSTRACT:
 # PODNAME:
 
-=head1 DESCRIPTION
-
-
 =head1 SEE ALSO
 
 L<ss-info>

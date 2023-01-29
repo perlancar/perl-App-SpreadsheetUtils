@@ -63,9 +63,6 @@ Perinci::CmdLine::Any->new(
 # ABSTRACT:
 # PODNAME:
 
-=head1 DESCRIPTION
-
-
 =head1 SEE ALSO
 
 L<Spreadsheet::Read> is the backend that does all the magic.
