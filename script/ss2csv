@@ -17,7 +17,7 @@ $SPEC{ss2csv} = {
 
 Convert first worksheet of `foo.xlsx` to `foo.csv`:
 
-    % ss2csv foo.xlsx foo.csv
+    % ss2csv foo.xlsx -o foo.csv
 
 Convert worksheet named `Sheet2` in `foo.xlsx` to CSV, output to stdout:
 
