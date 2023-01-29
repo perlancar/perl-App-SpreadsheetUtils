@@ -1,0 +1,21 @@
+#!perl
+
+use 5.010001;
+use strict;
+use warnings;
+
+die "Not yet implemented!";
+
+# ABSTRACT: (NOT YET IMPLEMENTED) Show information about a spreadsheet file
+
+=head1 SYNOPSIS
+
+ % ss-info foo.xlsx
+
+
+=head1 DESCRIPTION
+
+
+=head1 SEE ALSO
+
+L<ss-list-sheets>

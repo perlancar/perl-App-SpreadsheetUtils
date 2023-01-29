@@ -1,0 +1,62 @@
+#!perl
+
+use 5.010001;
+use strict;
+use warnings;
+
+use App::SpreadsheetUtils;
+
+our %SPEC;
+
+$SPEC{ss_list_sheets} = {
+    v => 1.1,
+    summary => 'List worksheets in a spreadsheet (workbook) file',
+    description => <<'_',
+
+**Some examples**
+
+List worksheets of `foo.xlsx`:
+
+    % ss-list-sheets foo.xlsx
+
+
+
+_
+    args => {
+        %App::SpreadsheetUtils::argspecopt0_input_filename,
+        %App::SpreadsheetUtils::argspecopt_sheet,
+        detail => {
+            schema => 'bool*',
+            cmdline_aliases => {l=>{}},
+        },
+    },
+};
+sub ss_list_sheets {
+    my %args = @_;
+
+    my $book = App::SpreadsheetUtils::_get_book($args{input_filename});
+
+    my @rows;
+    for my $sheet ($book->sheets) {
+        push @rows, $sheet;
+    }
+
+    [200, "OK", \@rows];
+}
+
+use Perinci::CmdLine::Any;
+Perinci::CmdLine::Any->new(
+    url => '/main/ss_list_sheets',
+    log => 1,
+    read_config => 0,
+    read_env => 0,
+)->run;
+
+# ABSTRACT:
+
+=head1 DESCRIPTION
+
+
+=head1 SEE ALSO
+
+L<ss-info>

@@ -1,0 +1,69 @@
+#!perl
+
+use 5.010001;
+use strict;
+use warnings;
+
+use App::SpreadsheetUtils;
+
+our %SPEC;
+
+$SPEC{ss2csv} = {
+    v => 1.1,
+    summary => 'Convert spreadsheet to CSV',
+    description => <<'_',
+
+**Some examples**
+
+Convert first worksheet of `foo.xlsx` to `foo.csv`:
+
+    % ss2csv foo.xlsx foo.csv
+
+Convert worksheet named `Sheet2` in `foo.xlsx` to CSV, output to stdout:
+
+    % ss2csv foo.xlsx -s Sheet2
+
+_
+    args => {
+        %App::SpreadsheetUtils::argspecopt0_input_filename,
+        %App::SpreadsheetUtils::argspecopt_output_filename,
+        %App::SpreadsheetUtils::argspecopt_sheet,
+        %App::SpreadsheetUtils::argspecopt_overwrite,
+    },
+};
+sub ss2csv {
+    my %args = @_;
+
+    my $book = App::SpreadsheetUtils::_get_book($args{input_filename});
+    my ($sheetidx, $sheetname, $sheet) = App::SpreadsheetUtils::_select_sheet($book, $args{sheet});
+
+    require Text::CSV_XS;
+    my $csv = Text::CSV_XS->new({binary=>1});
+
+    my $res = [200, "OK", ""];
+    my $i = -1;
+    for my $row ($sheet->rows) {
+        $i++;
+        my $combres = $csv->combine(@$row);
+        die "Can't combine CSV fields for row[$i]" unless $combres;
+        $res->[2] .= $csv->string."\n";
+    }
+
+    App::SpreadsheetUtils::_return_or_write_file($res, $args{output_filename}, $args{overwrite});
+}
+
+use Perinci::CmdLine::Any;
+Perinci::CmdLine::Any->new(
+    url => '/main/ss2csv',
+    log => 1,
+    read_config => 0,
+    read_env => 0,
+)->run;
+
+# ABSTRACT:
+# PODNAME:
+
+=head1 DESCRIPTION
+
+
+=head1 SEE ALSO

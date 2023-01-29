@@ -20,37 +20,66 @@ our %SPEC;
 
 our $sch_req_str_or_code = ['any*', of=>['str*', 'code*']];
 
-sub _open_file_read {
+sub _get_book {
     my $filename = shift;
 
-    my ($fh, $err);
     if ($filename eq '-') {
         require File::Temp;
 
-        # write to temporary file first
-        $fh = *STDIN;
-    } else {
-        open $fh, "<", $filename or do {
-            $err = [500, "Can't open input filename '$filename': $!"];
-            goto RETURN;
-        };
+        log_trace "Writing spreadsheet data from stdin to temporary file first ...";
+        my ($tempfh, $tempfilename) = File::Temp::tempfile();
+        log_trace "Temporary filename: %s", $tempfilename;
+        while (my $line = <STDIN>) { print $tempfh $line }
+        close $tempfh or die "Can't write $filename: $!";
+        $filename = $tempfilename;
     }
-    binmode $fh, ":encoding(utf8)";
 
-  RETURN:
-    ($fh, $err);
+    require Spreadsheet::Read;
+    Spreadsheet::Read->new($filename);
 }
 
-sub _open_file_write {
-    my $filename = shift;
+sub _select_sheet {
+    my ($book, $sheetidx_or_name) = @_;
 
-  RETURN:
-    (undef, [501, "Not yet implemented"]);
+    my ($sheetidx, $sheetname, $sheetobj);
+
+    my @sheets = $book->sheets;
+    $sheetidx_or_name //= 0;
+    for my $i (0 .. $#sheets) {
+        if ($sheetidx_or_name =~ /\A[1-9]*[0-9]\z/) {
+            if ($i == $sheetidx_or_name) { $sheetidx = $i; $sheetname = $sheets[$i]; last }
+        } else {
+            if ($sheets[$i] eq $sheetidx_or_name) { $sheetidx = $1; $sheetname =  $sheetidx_or_name; last }
+        }
+    }
+    die "unknown sheet '$sheetidx_or_name' in workbook" unless defined $sheetidx;
+
+    $sheetobj = $book->sheet($sheetname) or die "BUG: Can't get sheet[#$sheetidx] named '$sheetname'";
+    ($sheetidx, $sheetname, $sheetobj);
 }
 
 sub _return_or_write_file {
     my ($res, $filename, $overwrite) = @_;
-    [501, "Not yet implemented"];
+    return $res if !defined($filename);
+
+    my $fh;
+    if ($filename eq '-') {
+        $fh = \*STDOUT;
+    } else {
+        if (-f $filename) {
+            if ($overwrite) {
+                log_info "Overwriting output file $filename";
+            } else {
+                return [412, "Refusing to ovewrite existing output file '$filename', please select another path or specify --overwrite"];
+            }
+        }
+        open my $fh, ">", $filename or do {
+            return [500, "Can't open output file '$filename': $!"];
+        };
+        print $fh $res->[2];
+        close $fh or warn "Can't write to '$filename': $!";
+        return [$res->[0], $res->[1]];
+    }
 }
 
 sub compile_eval_code {
@@ -99,39 +128,6 @@ sub _get_csv_row {
     my $status = $csv->combine(@$row)
         or die "Error in line $i: ".$csv->error_input."\n";
     $csv->string . "\n";
-}
-
-sub _instantiate_parser_default {
-    require Text::CSV_XS;
-
-    Text::CSV_XS->new({binary=>1});
-}
-
-sub _instantiate_parser {
-    require Text::CSV_XS;
-
-    my ($args, $prefix) = @_;
-    $prefix //= '';
-
-    my %tcsv_opts = (binary=>1);
-    if (defined $args->{"${prefix}sep_char"} ||
-            defined $args->{"${prefix}quote_char"} ||
-            defined $args->{"${prefix}escape_char"}) {
-        $tcsv_opts{"sep_char"}    = $args->{"${prefix}sep_char"}    if defined $args->{"${prefix}sep_char"};
-        $tcsv_opts{"quote_char"}  = $args->{"${prefix}quote_char"}  if defined $args->{"${prefix}quote_char"};
-        $tcsv_opts{"escape_char"} = $args->{"${prefix}escape_char"} if defined $args->{"${prefix}escape_char"};
-    } elsif ($args->{"${prefix}tsv"}) {
-        $tcsv_opts{"sep_char"}    = "\t";
-        $tcsv_opts{"quote_char"}  = undef;
-        $tcsv_opts{"escape_char"} = undef;
-    }
-
-    Text::CSV_XS->new(\%tcsv_opts);
-}
-
-sub _instantiate_emitter {
-    my $args = shift;
-    _instantiate_parser($args, 'output_');
 }
 
 sub _complete_field_or_field_list {
@@ -275,7 +271,7 @@ sub _select_fields {
     [100, "Continue", [\@selected_fields, \@selected_field_idxs_array]];
 }
 
-our $xcomp_csvfiles = [filename => {file_ext_filter => qr/\.[tc]sv$/i}];
+our $xcomp_spreadsheet_files = [filename => {file_ext_filter => qr/\.(?:sxc|ods|xls|xlsx|xlsm|csv)$/i}];
 
 our %argspecs_csv_input = (
     # input_format?
@@ -351,7 +347,7 @@ _
 
 our %argspecopt_input_filename = (
     input_filename => {
-        summary => 'Input CSV file',
+        summary => 'Input spreadsheet file',
         description => <<'_',
 
 Use `-` to read from stdin.
@@ -361,16 +357,15 @@ Encoding of input file is assumed to be UTF-8.
 _
         schema => 'filename*',
         default => '-',
-        'x.completion' => $xcomp_csvfiles,
+        'x.completion' => $xcomp_spreadsheet_files,
         tags => ['category:input'],
     },
 );
 
-our %argspecopt_input_filenames = (
-    input_filenames => {
-        'x.name.is_plural' => 1,
-        'x.name.singular' => 'input_filename',
-        summary => 'Input CSV files',
+# TEMP
+our %argspecopt0_input_filename = (
+    input_filename => {
+        summary => 'Input spreadsheet file',
         description => <<'_',
 
 Use `-` to read from stdin.
@@ -378,9 +373,28 @@ Use `-` to read from stdin.
 Encoding of input file is assumed to be UTF-8.
 
 _
+        schema => 'filename*',
+        default => '-',
+        'x.completion' => $xcomp_spreadsheet_files,
+        pos => 0,
+        tags => ['category:input'],
+    },
+);
+
+
+our %argspecopt_input_filenames = (
+    input_filenames => {
+        'x.name.is_plural' => 1,
+        'x.name.singular' => 'input_filename',
+        summary => 'Input spreadsheet files',
+        description => <<'_',
+
+Use `-` to read from stdin.
+
+_
         schema => ['array*', of=>'filename*'],
         default => ['-'],
-        'x.completion' => $xcomp_csvfiles,
+        'x.element_completion' => $xcomp_spreadsheet_files,
         tags => ['category:input'],
     },
 );
@@ -401,8 +415,6 @@ our %argspecopt_output_filename = (
 
 Use `-` to output to stdout (the default if you don't specify this option).
 
-Encoding of output file is assumed to be UTF-8.
-
 _
         schema => 'filename*',
         cmdline_aliases=>{o=>{}},
@@ -417,12 +429,27 @@ our %argspecopt_output_filenames = (
 
 Use `-` to output to stdout (the default if you don't specify this option).
 
-Encoding of output file is assumed to be UTF-8.
-
 _
         schema => ['array*', of=>'filename*'],
         cmdline_aliases=>{o=>{}},
         tags => ['category:output'],
+    },
+);
+
+our %argspecopt_sheet = (
+    sheet => {
+        summary => 'Select specified worksheet in a workbook',
+        schema => 'str*',
+        description => <<'_',
+
+Sheet can be selected by name, or by number (0 means the first sheet, 1 the
+second, and so on). For CSV, the single worksheet name is the filename/path
+itself. To quickly list the sheets of a workbook file, you can use
+<prog:ss-list-sheets>.
+
+_
+        cmdline_aliases => {s=>{}},
+        tags => ['category:filtering'],
     },
 );
 
@@ -718,9 +745,9 @@ sub _add_arg_pos {
     }
 }
 
-$SPEC{gen_csv_util} = {
+$SPEC{gen_ss_util} = {
     v => 1.1,
-    summary => 'Generate a CSV utility',
+    summary => 'Generate a spreadsheet utility',
     description => <<'_',
 
 This routine is used to generate a CSV utility in the form of a <pm:Rinci>
@@ -1075,8 +1102,9 @@ _
     result => {
         schema => 'bool*',
     },
+    tags => ['hidden'],
 };
-sub gen_csv_util {
+sub gen_ss_util {
     my %gen_args = @_;
 
     my $name = delete($gen_args{name}) or die "Please specify name";
@@ -1573,7 +1601,7 @@ This distribution contains the following CLI utilities:
 # INSERT_EXECS_LIST
 
 
-=head1 append:FUNCTIONS
+=head1 FUNCTIONS
 
 =head2 compile_eval_code
 
